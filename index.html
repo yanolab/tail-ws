@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html ng:app>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>logging</title>
+  <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+  <style type="text/css">
+      body {
+        padding-top: 10px;
+      }
+  </style>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+  <script>
+    function LogCtrl($scope) {
+      $scope.host = location.host
+    
+      var ws = new WebSocket("ws://"+location.host+"/tail");
+    
+      ws.onopen = function(){console.debug("open");}
+      ws.onerror = function(){console.debug("error");}
+      ws.onclose = function(){console.debug("closed");}
+
+      ws.onmessage = function(message){
+        if ($scope.filterText == null || message.data.indexOf($scope.filterText) >= 0) {
+          if (message.data.indexOf("INFO") >= 0) {
+            $("#log").prepend("<div class='text-info'>" + message.data + "</div>");
+          } else if(message.data.indexOf("WARN") >= 0) {
+            $("#log").prepend("<div class='text-warning'>" + message.data + "</div>");
+          } else if(message.data.indexOf("ERROR") >= 0) {
+            $("#log").prepend("<div class='text-error'>" + message.data + "</div>");
+          } else {
+            $("#log").prepend("<div class='muted'>" + message.data + "</div>");
+          }
+        }
+      }
+    
+      $(window).unload(function() {
+        ws.close(); // WebSocket close
+      })
+    }
+
+    document.title = location.host
+  </script>
+</head>
+<body ng:controller="LogCtrl">
+  <div class="container">
+    FILTER : <input ng:model="filterText" type="text" placeholder="TEXT HERE">
+    <div id="log"></div>
+  </div>
+</body>
+</html>
