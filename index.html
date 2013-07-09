@@ -7,6 +7,7 @@
   <style type="text/css">
       body {
         padding-top: 10px;
+        background-color: #FFFFFF;
       }
   </style>
   <script src="//code.jquery.com/jquery-latest.min.js"></script>
@@ -14,7 +15,7 @@
   <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
   <script>
     function LogCtrl($scope) {
-      $scope.host = location.host
+      $scope.host = location.host;
     
       var ws = new WebSocket("ws://"+location.host+"/tail");
     
@@ -24,15 +25,17 @@
 
       ws.onmessage = function(message){
         if ($scope.filterText == null || message.data.indexOf($scope.filterText) >= 0) {
+          var cls = "muted";
+
           if (message.data.indexOf("INFO") >= 0) {
-            $("#log").prepend("<div class='text-info'>" + message.data + "</div>");
+            cls = "text-info";
           } else if(message.data.indexOf("WARN") >= 0) {
-            $("#log").prepend("<div class='text-warning'>" + message.data + "</div>");
+            cls = "text-warning";
           } else if(message.data.indexOf("ERROR") >= 0) {
-            $("#log").prepend("<div class='text-error'>" + message.data + "</div>");
-          } else {
-            $("#log").prepend("<div class='muted'>" + message.data + "</div>");
+            cls = "text-error";
           }
+
+          $("#log").prepend("<div class='" + cls + "'>" + message.data + "</div>");
         }
       }
     
@@ -41,7 +44,7 @@
       })
     }
 
-    document.title = location.host
+    document.title = location.host;
   </script>
 </head>
 <body ng:controller="LogCtrl">
