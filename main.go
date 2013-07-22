@@ -96,18 +96,18 @@ func main() {
 	log.Printf("Start server on %v:%v and watching %v\n", *host, *port, filepath)
 
 	go func() {
-		if err := http.ListenAndServe(*host+":"+*port, nil); err != nil {
-			fmt.Println("Could not start server. %v", err)
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGKILL)
+		for sig := range ch {
+			log.Printf("Received signal: %v", sig)
+			if sig == syscall.SIGINT {
+				log.Printf("shutdown")
+				return
+			}
 		}
 	}()
 
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGKILL)
-	for sig := range ch {
-		log.Printf("Received signal: %v", sig)
-		if sig == syscall.SIGINT {
-			log.Printf("shutdown")
-			return
-		}
+	if err := http.ListenAndServe(*host+":"+*port, nil); err != nil {
+		fmt.Println("Could not start server. %v", err)
 	}
 }
