@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"html"
 )
 
 func loadIndex(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +46,8 @@ func tailHandler(filepath string) func(*websocket.Conn) {
 
 		tailf := func() {
 			for line := range file.Lines {
-				ws.Write([]byte(line.Text))
+				escapedText := html.EscapeString(line.Text)
+				ws.Write([]byte(escapedText))
 			}
 		}
 
@@ -89,7 +91,7 @@ func main() {
 
 	go func() {
 		if err := http.ListenAndServe(*host+":"+*port, nil); err != nil {
-			fmt.Println("Could not start server.")
+			fmt.Println("Could not start server. %v", err)
 		}
 	}()
 
