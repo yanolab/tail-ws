@@ -15,6 +15,8 @@
   <script>
     function LogCtrl($scope) {
       $scope.host = location.host;
+      $scope.maxBufferLen = 1000;
+      $scope.autoScroll = true;
 
       var url = "ws://"+location.host+"/tail" + location.search;
       var ws = new WebSocket(url);
@@ -24,6 +26,7 @@
       ws.onclose = function(){console.debug("closed");}
 
       var cls = "muted";
+      var lines = 0;
       ws.onmessage = function(message){
         if ($scope.filterText == null || message.data.indexOf($scope.filterText) >= 0) {
           if (message.data.indexOf("DEBUG") >= 0) {
@@ -37,7 +40,14 @@
           }
 
           $("#log").append("<div class='" + cls + "'>" + message.data + "</div>");
-          window.scrollTo(0, document.body.scrollHeight);
+
+          if ($scope.autoScroll)
+            window.scrollTo(0, document.body.scrollHeight);
+
+          lines += 1;
+
+          if (lines > $scope.maxBufferLen)
+            $("#log").children().first().remove();
         }
       }
 
@@ -51,7 +61,7 @@
 </head>
 <body ng:controller="LogCtrl">
   <div class="container">
-    FILTER : <input ng:model="filterText" type="text" placeholder="TEXT HERE">
+    IN-FILTER : <input ng:model="filterText" type="text" placeholder="TEXT HERE"> MAX Buffer Len : <input ng:model="maxBufferLen" type="text"> AUTO Scroll : <input ng:model="autoScroll" type="checkbox">
     <div id="log"></div>
   </div>
 </body>
