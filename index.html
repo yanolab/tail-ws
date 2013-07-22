@@ -14,28 +14,33 @@
   <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
   <script>
     function LogCtrl($scope) {
-      $scope.host = location.host
-    
-      var ws = new WebSocket("ws://"+location.host+"/tail");
-    
+      $scope.host = location.host;
+
+      var url = "ws://"+location.host+"/tail" + location.search;
+      var ws = new WebSocket(url);
+
       ws.onopen = function(){console.debug("open");}
       ws.onerror = function(){console.debug("error");}
       ws.onclose = function(){console.debug("closed");}
 
+      var cls = "muted";
       ws.onmessage = function(message){
         if ($scope.filterText == null || message.data.indexOf($scope.filterText) >= 0) {
-          if (message.data.indexOf("INFO") >= 0) {
-            $("#log").prepend("<div class='text-info'>" + message.data + "</div>");
-          } else if(message.data.indexOf("WARN") >= 0) {
-            $("#log").prepend("<div class='text-warning'>" + message.data + "</div>");
-          } else if(message.data.indexOf("ERROR") >= 0) {
-            $("#log").prepend("<div class='text-error'>" + message.data + "</div>");
-          } else {
-            $("#log").prepend("<div class='muted'>" + message.data + "</div>");
+          if (message.data.indexOf("DEBUG") >= 0) {
+            cls = "muted";
+          } else if (message.data.indexOf("INFO") >= 0) {
+            cls = "text-info";
+          } else if (message.data.indexOf("WARN") >= 0) {
+            cls = "text-warning";
+          } else if (message.data.indexOf("ERROR") >= 0) {
+            cls = "text-error";
           }
+
+          $("#log").append("<div class='" + cls + "'>" + message.data + "</div>");
+          window.scrollTo(0, document.body.scrollHeight);
         }
       }
-    
+
       $(window).unload(function() {
         ws.close(); // WebSocket close
       })
