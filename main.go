@@ -37,6 +37,12 @@ func tailHandler(filepath string) func(*websocket.Conn) {
 			ws.Close()
 		}()
 
+		path := ws.Request().FormValue("path")
+
+		if path != "" {
+			filepath = path
+		}
+
 		file, err := tail.TailFile(filepath, tail.Config{Follow: true, ReOpen: true})
 
 		if err != nil {
@@ -87,7 +93,7 @@ func main() {
 
 	http.HandleFunc("/", loadIndex)
 	http.Handle("/tail", websocket.Handler(tailHandler(filepath)))
-	fmt.Printf("Start server on %v:%v and watching %v\n", *host, *port, filepath)
+	log.Printf("Start server on %v:%v and watching %v\n", *host, *port, filepath)
 
 	go func() {
 		if err := http.ListenAndServe(*host+":"+*port, nil); err != nil {
