@@ -74,7 +74,7 @@ func main() {
 	flag.Parse()
 
 	if len(flag.Args()) != 1 {
-		fmt.Println("Usage: tails [-b bind address] [-p bind port] filepath")
+		fmt.Println(fmt.Sprintf("Usage: %s [-b bind address] [-p bind port] filepath", os.Args[0]))
 		return
 	}
 
